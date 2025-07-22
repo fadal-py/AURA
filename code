@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Health Platform</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* Aetheria Connect Nexus Inspired Redesign */
+        :root {
+            --background-dark: #0D0D0D;
+            --card-background: #141416;
+            --text-primary: #F0F0F0;
+            --text-secondary: #A0A0A0;
+            --gradient-start: #8A2BE2; /* BlueViolet */
+            --gradient-end: #4169E1;   /* RoyalBlue */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-dark);
+            color: var(--text-primary);
+        }
+
+        /* Gradient Border Card Effect */
+        .aetheria-card {
+            background-color: var(--card-background);
+            border-radius: 1rem;
+            position: relative;
+            padding: 1.5rem; /* Default padding */
+            z-index: 1;
+            overflow: hidden;
+        }
+        .aetheria-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: -1;
+            margin: -2px; /* Border width */
+            border-radius: inherit; /* Match parent */
+            background: linear-gradient(145deg, var(--gradient-start), var(--gradient-end));
+        }
+        
+        /* Navigation Styling */
+        .nav-item {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .nav-item.active {
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.4);
+        }
+        .nav-item:not(.active):hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .aura-logo {
+            filter: drop-shadow(0 0 8px var(--gradient-end));
+        }
+
+        /* Button Styling */
+        .btn-gradient {
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
+        }
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(65, 105, 225, 0.5);
+        }
+        .btn-dark {
+            background-color: #222;
+            border: 1px solid #444;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        .btn-dark:hover {
+            background-color: #333;
+            border-color: var(--gradient-start);
+        }
+
+        .page { display: none; }
+        .page.active { display: block; }
+
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        .status-green { background-color: #22c55e; box-shadow: 0 0 8px #22c55e; }
+        .status-yellow { background-color: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+        .status-red { background-color: #ef4444; box-shadow: 0 0 8px #ef4444; }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--background-dark); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #444; }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 50; opacity: 0; visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal-overlay.visible { opacity: 1; visibility: visible; }
+        .modal-content { max-height: 90vh; overflow-y: auto; }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row h-screen">
+
+    <!-- Sidebar Navigation -->
+    <nav class="w-full md:w-64 bg-black/50 m-2 p-4 flex flex-col shrink-0 rounded-2xl border border-gray-800">
+        <div class="flex items-center mb-8">
+            <svg class="h-8 w-8 text-white mr-2 aura-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z" fill="url(#logo-gradient)"/><path d="M12 7c-2.757 0-5 2.243-5 5h2c0-1.654 1.346-3 3-3s3 1.346 3 3h2c0-2.757-2.243-5-5-5z" fill="url(#logo-gradient)" opacity=".6"/><defs><linearGradient id="logo-gradient" x1="2" y1="12" x2="22" y2="12" gradientUnits="userSpaceOnUse"><stop stop-color="#8A2BE2"/><stop offset="1" stop-color="#4169E1"/></linearGradient></defs></svg>
+            <h1 class="text-2xl font-bold text-white">Aura Health</h1>
+        </div>
+        <ul class="space-y-2 flex-1">
+            <li><a href="#" class="nav-item flex items-center p-3 rounded-lg active" data-page="dashboard">
+                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                Dashboard
+            </a></li>
+             <li><a href="#" class="nav-item flex items-center p-3 rounded-lg" data-page="symptom-log">
+                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                Symptom Log
+            </a></li>
+            <li><a href="#" class="nav-item flex items-center p-3 rounded-lg" data-page="dtx-suite">
+                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                DTx Suite
+            </a></li>
+            <li><a href="#" class="nav-item flex items-center p-3 rounded-lg" data-page="health-passport">
+                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 21h7a2 2 0 002-2V5a2 2 0 00-2-2h-7l-3 3v12a2 2 0 002 2zM10 3L7 6h3v12h4V6h3l-3-3z"></path></svg>
+                Health Passport
+            </a></li>
+            <li><a href="#" class="nav-item flex items-center p-3 rounded-lg" data-page="concierge">
+                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a2 2 0 01-2-2V7a2 2 0 012-2h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293H17z"></path></svg>
+                Aura Concierge
+            </a></li>
+            <li><a href="#" class="nav-item flex items-center p-3 rounded-lg" data-page="pharmacy">
+                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                Aura Pharmacy
+            </a></li>
+            <li><a href="#" class="nav-item flex items-center p-3 rounded-lg" data-page="care-circle">
+                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                Care Circle
+            </a></li>
+            <li><a href="#" class="nav-item flex items-center p-3 rounded-lg" data-page="products">
+                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                Products
+            </a></li>
+        </ul>
+        <div class="mt-auto">
+            <div class="flex items-center p-3 bg-gray-900/50 rounded-lg border border-gray-700">
+                <img src="https://placehold.co/40x40/8A2BE2/white?text=A" alt="User Avatar" class="rounded-full mr-3">
+                <div>
+                    <p class="font-semibold text-white">Ama Asantewaa</p>
+                    <a href="#" class="text-sm text-blue-400 hover:underline">View Profile</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto p-2 md:p-4">
+        
+        <!-- Dashboard Page -->
+        <div id="dashboard" class="page active">
+            <div class="flex justify-between items-center mb-4">
+                 <h2 class="text-3xl font-bold text-white">Dashboard</h2>
+                 <button id="log-symptom-btn" class="btn-gradient px-4 py-2 font-semibold rounded-lg flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Log Symptoms
+                 </button>
+            </div>
+            <p class="text-secondary mb-6">Welcome back, Ama. Here's your live health overview from your Aura Sentinel X.</p>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+                <div class="aetheria-card p-4 flex flex-col items-center justify-center">
+                    <div class="flex items-center text-secondary text-sm mb-2"><svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>Heart Rate</div>
+                    <div class="flex items-baseline"><span id="hr-value" class="text-4xl font-bold text-white">72</span><span class="text-secondary ml-1">BPM</span></div>
+                    <div id="hr-status" class="flex items-center text-green-400 text-sm mt-2"><span class="status-dot status-green mr-1.5"></span>Normal</div>
+                </div>
+                <div class="aetheria-card p-4 flex flex-col items-center justify-center">
+                    <div class="flex items-center text-secondary text-sm mb-2"><svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 0l-3.536 3.536m3.536-3.536l3.536 3.536M12 21a9 9 0 100-18 9 9 0 000 18z"></path></svg>Glucose</div>
+                    <div class="flex items-baseline"><span id="glucose-value" class="text-4xl font-bold text-white">105</span><span class="text-secondary ml-1">mg/dL</span></div>
+                    <div id="glucose-status" class="flex items-center text-green-400 text-sm mt-2"><span class="status-dot status-green mr-1.5"></span>Stable</div>
+                </div>
+                <div class="aetheria-card p-4 flex flex-col items-center justify-center">
+                    <div class="flex items-center text-secondary text-sm mb-2"><svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>Blood Pressure</div>
+                    <div class="flex items-baseline"><span id="bp-value" class="text-4xl font-bold text-white">118/75</span></div>
+                    <div id="bp-status" class="flex items-center text-green-400 text-sm mt-2"><span class="status-dot status-green mr-1.5"></span>Optimal</div>
+                </div>
+                <div class="aetheria-card p-4 flex flex-col items-center justify-center">
+                    <div class="flex items-center text-secondary text-sm mb-2"><svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>SpO2</div>
+                    <div class="flex items-baseline"><span id="spo2-value" class="text-4xl font-bold text-white">98</span><span class="text-secondary ml-1">%</span></div>
+                    <div id="spo2-status" class="flex items-center text-green-400 text-sm mt-2"><span class="status-dot status-green mr-1.5"></span>Normal</div>
+                </div>
+                <div class="aetheria-card p-4 flex flex-col items-center justify-center">
+                    <div class="flex items-center text-secondary text-sm mb-2"><svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>Stress (EDA)</div>
+                    <div class="flex items-baseline"><span id="stress-value" class="text-4xl font-bold text-white">15</span></div>
+                     <div id="stress-status" class="flex items-center text-green-400 text-sm mt-2"><span class="status-dot status-green mr-1.5"></span>Calm</div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 aetheria-card">
+                    <h3 class="text-lg font-semibold text-white mb-2">Heart Rate Trend (Last Hour)</h3>
+                    <canvas id="hrChart"></canvas>
+                </div>
+                <div class="aetheria-card flex flex-col">
+                    <h3 class="text-lg font-semibold text-white mb-3">Elara AI Coach</h3>
+                    <div class="space-y-3 flex-1">
+                        <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700">
+                            <p class="text-sm font-medium" style="color: var(--gradient-start);">Observation</p>
+                            <p class="text-secondary text-sm">Your average resting heart rate today is 2 BPM lower than yesterday. Great recovery after your activity!</p>
+                        </div>
+                        <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700">
+                            <p class="text-sm font-medium text-green-400">Recommendation</p>
+                            <p class="text-secondary text-sm">Your sleep score was 92 last night. Let's aim for a similar bedtime tonight to maintain this positive trend.</p>
+                        </div>
+                    </div>
+                    <button class="btn-dark w-full p-2 mt-4 rounded-lg text-sm">View All Insights</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Symptom Log Page -->
+        <div id="symptom-log" class="page">
+            <h2 class="text-3xl font-bold text-white mb-4">Symptom Log ("My Story")</h2>
+            <p class="text-secondary mb-6">A chronological record of your logged symptoms and journal entries.</p>
+            <div class="aetheria-card">
+                <div id="symptom-log-entries" class="space-y-4">
+                    <p class="text-secondary">No symptoms logged yet. Use the "Log Symptoms" button on the dashboard to add an entry.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- DTx Suite Page -->
+        <div id="dtx-suite" class="page">
+            <h2 class="text-3xl font-bold text-white mb-4">Digital Therapeutics (DTx) Suite</h2>
+            <p class="text-secondary mb-6">Engage with evidence-based therapeutic programs prescribed by your doctor.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- DTx Module 1: Chronic Pain -->
+                <div class="aetheria-card flex flex-col">
+                    <div class="mb-4">
+                        <span class="px-3 py-1 text-xs font-semibold text-white rounded-full" style="background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));">Prescribed</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Aura Relief</h3>
+                    <p class="text-secondary mb-4">8-Week CBT for Chronic Pain</p>
+                    <p class="text-sm text-secondary flex-1">A guided program using Cognitive Behavioral Therapy and guided exercises to manage chronic pain.</p>
+                    <div class="w-full bg-gray-700 rounded-full h-2.5 my-4">
+                        <div class="h-2.5 rounded-full" style="width: 45%; background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));"></div>
+                    </div>
+                    <button class="btn-gradient w-full py-2 rounded-lg font-semibold">Continue Program</button>
+                </div>
+                <!-- DTx Module 2: Respiratory -->
+                <div class="aetheria-card flex flex-col">
+                     <div class="mb-4">
+                        <span class="px-3 py-1 text-xs font-semibold bg-gray-700 text-gray-300 rounded-full">Locked</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Aura Breathe</h3>
+                    <p class="text-secondary mb-4">Pulmonary Rehabilitation</p>
+                    <p class="text-sm text-secondary flex-1">Improve lung capacity and manage respiratory illness with guided breathing and inhaler technique training.</p>
+                     <div class="w-full bg-gray-700 rounded-full h-2.5 my-4">
+                        <div class="bg-gray-500 h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <button class="btn-dark w-full py-2 rounded-lg font-semibold cursor-not-allowed">Requires Prescription</button>
+                </div>
+                <!-- DTx Module 3: Mental Health -->
+                <div class="aetheria-card flex flex-col">
+                    <div class="mb-4">
+                        <span class="px-3 py-1 text-xs font-semibold bg-gray-700 text-gray-300 rounded-full">Locked</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Aura Mind</h3>
+                    <p class="text-secondary mb-4">Anxiety Management Program</p>
+                    <p class="text-sm text-secondary flex-1">A series of cognitive exercises and mindfulness sessions to help manage symptoms of anxiety.</p>
+                     <div class="w-full bg-gray-700 rounded-full h-2.5 my-4">
+                        <div class="bg-gray-500 h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <button class="btn-dark w-full py-2 rounded-lg font-semibold cursor-not-allowed">Requires Prescription</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Passport Page -->
+        <div id="health-passport" class="page">
+            <h2 class="text-3xl font-bold text-white mb-4">Health Passport</h2>
+            <p class="text-secondary mb-6">Your complete, secure, and portable health record. Powered by blockchain technology.</p>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-1 aetheria-card flex flex-col items-center text-center">
+                    <h3 class="text-xl font-bold text-white mb-2">Share Your Passport</h3>
+                    <p class="text-sm text-secondary mb-4">Scan this QR code to grant temporary, secure access to your health records.</p>
+                    <div class="p-4 bg-white rounded-lg">
+                        <img src="https://placehold.co/200x200/000000/FFFFFF?text=SCAN+ME" alt="QR Code for Health Passport">
+                    </div>
+                    <button class="btn-gradient w-full py-2 mt-4 rounded-lg font-semibold">Generate New Code</button>
+                </div>
+                <div class="lg:col-span-2 aetheria-card">
+                    <h3 class="text-lg font-semibold text-white mb-3">Access Log & Records</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-primary mb-2">Recent Activity</h4>
+                            <div class="text-sm space-y-2 text-secondary">
+                                <p>✅ Access granted to Dr. Akua Mensah (Cardiology) - Today, 9:32 AM</p>
+                                <p>❌ Access attempt denied from unknown IP - Yesterday, 8:15 PM</p>
+                                <p>✅ Access granted to Korle Bu Hospital ER - 15/07/2025, 4:22 PM</p>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-primary mb-2">Stored Records</h4>
+                             <div class="text-sm space-y-2 text-secondary">
+                                <p>📄 Lab Results (Blood Panel) - 18/07/2025</p>
+                                <p>📄 Consultation Notes (Dr. Mensah) - 18/07/2025</p>
+                                <p>📄 ECG Report - 17/07/2025</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Other Pages (placeholders) -->
+        <div id="concierge" class="page">...</div>
+        <div id="pharmacy" class="page">...</div>
+        <div id="care-circle" class="page">...</div>
+        <div id="products" class="page">...</div>
+    </main>
+
+    <!-- My Story Symptom Log Modal -->
+    <div id="my-story-modal" class="modal-overlay">
+        <div class="aetheria-card w-11/12 md:w-1/2 lg:w-1/3 p-0 modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold text-white">Log Your Story Today</h3>
+                    <button id="close-story-modal-btn" class="text-secondary text-2xl hover:text-white">&times;</button>
+                </div>
+                <p class="text-secondary mb-6">Log how you're feeling. This helps you and your doctor track your journey.</p>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-primary mb-2">Overall Feeling</label>
+                    <div class="flex justify-around bg-gray-900/50 p-2 rounded-lg border border-gray-700">
+                        <button class="text-4xl hover:scale-110 transition-transform">😞</button>
+                        <button class="text-4xl hover:scale-110 transition-transform">😐</button>
+                        <button class="text-4xl hover:scale-110 transition-transform">🙂</button>
+                        <button class="text-4xl hover:scale-110 transition-transform">😊</button>
+                        <button class="text-4xl hover:scale-110 transition-transform">😁</button>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-primary mb-2">Pain Level: <span id="pain-level-value">5</span>/10</label>
+                    <input id="pain-slider" type="range" min="0" max="10" value="5" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-primary mb-2">Fatigue Level: <span id="fatigue-level-value">3</span>/10</label>
+                    <input id="fatigue-slider" type="range" min="0" max="10" value="3" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <div class="mb-6">
+                    <label for="journal-entry" class="block text-sm font-medium text-primary mb-2">Journal Entry (Optional)</label>
+                    <textarea id="journal-entry" rows="4" class="w-full bg-gray-900/50 border border-gray-700 rounded-lg p-2 text-secondary focus:ring-1 focus:ring-purple-500 focus:border-purple-500" placeholder="Any specific details to note today?"></textarea>
+                </div>
+
+                <button id="submit-story-btn" class="btn-gradient w-full py-3 rounded-lg font-semibold">Save Today's Entry</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-dayjs-4@1.0.4/dist/chartjs-adapter-dayjs-4.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- App State & Data ---
+            const symptomLogs = []; // In a real app, this would be fetched from a server
+
+            // --- Element Selectors ---
+            const navLinks = document.querySelectorAll('.nav-item');
+            const pages = document.querySelectorAll('.page');
+            const hrValue = document.getElementById('hr-value');
+            const glucoseValue = document.getElementById('glucose-value');
+            const bpValue = document.getElementById('bp-value');
+            const spo2Value = document.getElementById('spo2-value');
+            const stressValue = document.getElementById('stress-value');
+            const logSymptomBtn = document.getElementById('log-symptom-btn');
+            const storyModal = document.getElementById('my-story-modal');
+            const closeStoryModalBtn = document.getElementById('close-story-modal-btn');
+            const submitStoryBtn = document.getElementById('submit-story-btn');
+            const painSlider = document.getElementById('pain-slider');
+            const painLevelValue = document.getElementById('pain-level-value');
+            const fatigueSlider = document.getElementById('fatigue-slider');
+            const fatigueLevelValue = document.getElementById('fatigue-level-value');
+            const symptomLogEntriesContainer = document.getElementById('symptom-log-entries');
+
+            // --- Navigation Logic ---
+            navLinks.forEach(link => {
+                link.addEventListener('click', e => {
+                    e.preventDefault();
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                    const pageId = link.getAttribute('data-page');
+                    pages.forEach(page => page.classList.toggle('active', page.id === pageId));
+                });
+            });
+
+            // --- Live Data Simulation ---
+            function updateVitals() {
+                hrValue.textContent = 60 + Math.floor(Math.random() * 15);
+                glucoseValue.textContent = 90 + Math.floor(Math.random() * 30);
+                bpValue.textContent = `${115 + Math.floor(Math.random() * 10)}/${75 + Math.floor(Math.random() * 5)}`;
+                spo2Value.textContent = 97 + Math.floor(Math.random() * 3);
+                stressValue.textContent = 10 + Math.floor(Math.random() * 20);
+            }
+            setInterval(updateVitals, 3000);
+            updateVitals();
+
+            // --- Symptom Logging (My Story) Logic ---
+            logSymptomBtn.addEventListener('click', () => storyModal.classList.add('visible'));
+            closeStoryModalBtn.addEventListener('click', () => storyModal.classList.remove('visible'));
+            
+            painSlider.addEventListener('input', () => painLevelValue.textContent = painSlider.value);
+            fatigueSlider.addEventListener('input', () => fatigueLevelValue.textContent = fatigueSlider.value);
+
+            submitStoryBtn.addEventListener('click', () => {
+                const newLog = {
+                    date: new Date(),
+                    pain: painSlider.value,
+                    fatigue: fatigueSlider.value,
+                    journal: document.getElementById('journal-entry').value
+                };
+                symptomLogs.unshift(newLog); // Add to the beginning of the array
+                renderSymptomLogs();
+                storyModal.classList.remove('visible');
+                // Reset form for next time
+                painSlider.value = 5;
+                fatigueSlider.value = 3;
+                painLevelValue.textContent = 5;
+                fatigueLevelValue.textContent = 3;
+                document.getElementById('journal-entry').value = '';
+            });
+
+            function renderSymptomLogs() {
+                if (symptomLogs.length === 0) {
+                    symptomLogEntriesContainer.innerHTML = `<p class="text-secondary">No symptoms logged yet.</p>`;
+                    return;
+                }
+                symptomLogEntriesContainer.innerHTML = symptomLogs.map(log => `
+                    <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+                        <p class="text-sm font-semibold text-primary mb-2">${log.date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} at ${log.date.toLocaleTimeString()}</p>
+                        <div class="flex space-x-4 text-secondary text-sm mb-2">
+                            <span>Pain: ${log.pain}/10</span>
+                            <span>Fatigue: ${log.fatigue}/10</span>
+                        </div>
+                        ${log.journal ? `<p class="text-secondary text-sm italic">"${log.journal}"</p>` : ''}
+                    </div>
+                `).join('');
+            }
+
+
+            // --- Chart.js Heart Rate Chart ---
+            const hrChartCtx = document.getElementById('hrChart').getContext('2d');
+            const hrChart = new Chart(hrChartCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Heart Rate',
+                        data: [],
+                        borderColor: '#8A2BE2',
+                        backgroundColor: 'rgba(138, 43, 226, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.4,
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: { unit: 'minute', tooltipFormat: 'h:mm:ss a', displayFormats: { minute: 'h:mm a' } },
+                            ticks: { color: 'var(--text-secondary)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        },
+                        y: {
+                            min: 50, max: 100,
+                            ticks: { color: 'var(--text-secondary)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            function addDataToChart() {
+                const data = hrChart.data;
+                if (data.datasets.length > 0) {
+                    const now = Date.now();
+                    data.labels.push(now);
+                    data.datasets[0].data.push(parseInt(hrValue.textContent));
+                    if (data.labels.length > 60) {
+                        data.labels.shift();
+                        data.datasets[0].data.shift();
+                    }
+                    hrChart.update('quiet');
+                }
+            }
+            
+            let time = dayjs().subtract(1, 'hour');
+            for(let i=0; i<60; i++){
+                 hrChart.data.labels.push(time.valueOf());
+                 hrChart.data.datasets[0].data.push(65 + Math.floor(Math.random() * 15));
+                 time = time.add(1, 'minute');
+            }
+            hrChart.update();
+            setInterval(addDataToChart, 3000);
+            
+            // Initial render of logs
+            renderSymptomLogs();
+        });
+    </script>
+
+</body>
+</html>
